@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>161</width>
+    <width>262</width>
     <height>164</height>
    </rect>
   </property>
@@ -17,7 +17,7 @@
    <widget class="LovelyHeartSwitch" name="widget" native="true">
     <property name="geometry">
      <rect>
-      <x>20</x>
+      <x>70</x>
       <y>40</y>
       <width>120</width>
       <height>80</height>
@@ -30,7 +30,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>161</width>
+     <width>262</width>
      <height>23</height>
     </rect>
    </property>
