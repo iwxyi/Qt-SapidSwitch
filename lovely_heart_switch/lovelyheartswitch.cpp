@@ -8,10 +8,6 @@
 LovelyHeartSwitch::LovelyHeartSwitch(QWidget *parent) : QWidget(parent)
 {
     calculateGeometry();
-
-    connect(this, &LovelyHeartSwitch::swtchChanged, this, [=](double prog){
-        update();
-    });
 }
 
 void LovelyHeartSwitch::setState(bool state)
@@ -60,7 +56,15 @@ void LovelyHeartSwitch::paintEvent(QPaintEvent *)
     const QPointF center3(rightAnglePos.x() - r_2/GenHao2, rightAnglePos.y() + r/2/GenHao2);
     const QRectF rect3 = QRectF(center3.x()-r_2, center3.y()-r_2, r, r);
     path.arcTo(rect3, -135, -180);
-    painter.fillPath(path, Qt::red);
+
+    // 计算颜色
+    QColor bg(
+                colorOff.red() + (colorOn.red() - colorOff.red())*aniProgess,
+                colorOff.green() + (colorOn.green() - colorOff.green())*aniProgess,
+                colorOff.blue() + (colorOn.blue() - colorOff.blue())*aniProgess,
+                colorOff.alpha() + (colorOn.alpha() - colorOff.alpha())*aniProgess
+                );
+    painter.fillPath(path, bg);
 
     // 绘制开关状态
     QPointF slideCenter(rightAnglePos.x(), rightAnglePos.y());
@@ -87,6 +91,7 @@ void LovelyHeartSwitch::mousePressEvent(QMouseEvent *event)
         pressPos = event->pos();
         moved = false;
         dragging = false;
+        prevX = pressPos.x();
     }
     QWidget::mousePressEvent(event);
 }
@@ -110,6 +115,9 @@ void LovelyHeartSwitch::mouseMoveEvent(QMouseEvent *event)
             else
                 aniProgess = static_cast<double>(x - slideLeft) / (slideRight - slideLeft);
             update();
+
+            moveTargetState = (x > prevX ? true : false);
+            prevX = x;
         }
     }
     QWidget::mouseMoveEvent(event);
@@ -122,6 +130,30 @@ void LovelyHeartSwitch::mouseReleaseEvent(QMouseEvent *event)
         if (!moved)
         {
             switchState();
+        }
+        else
+        {
+            bool oldState = currentState;
+            const double totalDistance = slideRight - slideLeft;
+            const double stickDistance = totalDistance * stickOnProp;
+            int x = event->pos().x();
+            if (x <= slideLeft + stickDistance)
+            {
+                currentState = false;
+            }
+            else if (x >= slideRight - stickDistance)
+            {
+                currentState = true;
+            }
+            else
+            {
+                currentState = moveTargetState;
+            }
+            if (currentState != oldState)
+            {
+                emit stateChanged(currentState);
+            }
+            update();
         }
 
         startSwitchAnimation();
@@ -158,6 +190,8 @@ void LovelyHeartSwitch::startSwitchAnimation()
     QPropertyAnimation* ani = new QPropertyAnimation(this, "swtch");
     ani->setStartValue(aniProgess);
     ani->setEndValue(target);
+    if (duration > 50)
+        ani->setEasingCurve(QEasingCurve::InOutCubic);
     ani->setDuration(duration);
     connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
     connect(ani, SIGNAL(valueChanged(const QVariant &)), this, SLOT(update()));

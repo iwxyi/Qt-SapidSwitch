@@ -11,7 +11,7 @@
 class LovelyHeartSwitch : public QWidget
 {
     Q_OBJECT
-    Q_PROPERTY(double swtch READ getSwtchProg WRITE setSwtchProg NOTIFY swtchChanged)
+    Q_PROPERTY(double swtch READ getSwtchProg WRITE setSwtchProg)
 public:
     LovelyHeartSwitch(QWidget *parent = nullptr);
 
@@ -36,7 +36,6 @@ private:
 
 signals:
     void stateChanged(bool state);
-    void swtchChanged(double prog);
 
 public slots:
 
@@ -44,6 +43,8 @@ private:
     // 状态
     bool currentState = false; // 开关状态
     double aniProgess = 0;     // 当前动画值，趋向state，范围0~1
+    QColor colorOn = Qt::red;
+    QColor colorOff = Qt::lightGray;
 
     // 几何
     const double PI = 3.1415926535;
@@ -58,6 +59,9 @@ private:
     QPoint pressPos;
     bool moved = false;
     bool dragging = false;
+    bool moveTargetState = false; // 滑动的目标状态，等待松手
+    const double stickOnProp = 0.15; // 在两侧贴靠，不收左右滑动手势影响
+    int prevX = 0;
 };
 
 #endif // LOVELYHEARTSWITCH_H
