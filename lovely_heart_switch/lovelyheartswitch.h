@@ -12,6 +12,7 @@ class LovelyHeartSwitch : public QWidget
 {
     Q_OBJECT
     Q_PROPERTY(double swtch READ getSwtchProg WRITE setSwtchProg)
+    Q_PROPERTY(double press READ getPressProg WRITE setPressProg)
 public:
     LovelyHeartSwitch(QWidget *parent = nullptr);
 
@@ -33,6 +34,8 @@ private:
 
     double getSwtchProg();
     void setSwtchProg(double p);
+    double getPressProg();
+    void setPressProg(double p);
 
 signals:
     void stateChanged(bool state);
@@ -62,6 +65,10 @@ private:
     bool moveTargetState = false; // 滑动的目标状态，等待松手
     const double stickOnProp = 0.15; // 在两侧贴靠，不收左右滑动手势影响
     int prevX = 0;
+
+    // 按压逻辑
+    const double pressScale = 0.9; // 按压缩小动画
+    double pressScaleProgress = 1;
 };
 
 #endif // LOVELYHEARTSWITCH_H

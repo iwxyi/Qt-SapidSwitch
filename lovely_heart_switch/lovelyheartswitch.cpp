@@ -75,7 +75,8 @@ void LovelyHeartSwitch::paintEvent(QPaintEvent *)
     circleSlidePath.arcTo(slideRect, -135, 90);
     QPointF circlePos = circleSlidePath.pointAtPercent(aniProgess);
     QPainterPath circlePath;
-    circlePath.addEllipse(circlePos.x()-circleRadius, circlePos.y()-circleRadius, circleRadius*2, circleRadius*2);
+    const double currentRadius = circleRadius * pressScaleProgress;
+    circlePath.addEllipse(circlePos.x()-currentRadius, circlePos.y()-currentRadius, currentRadius*2, currentRadius*2);
     painter.fillPath(circlePath, QColor(255, 250, 250));
 }
 
@@ -92,6 +93,14 @@ void LovelyHeartSwitch::mousePressEvent(QMouseEvent *event)
         moved = false;
         dragging = false;
         prevX = pressPos.x();
+
+        QPropertyAnimation* ani = new QPropertyAnimation(this, "press");
+        ani->setStartValue(pressScaleProgress);
+        ani->setEndValue(pressScale);
+        ani->setDuration(100);
+        connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
+        connect(ani, SIGNAL(valueChanged(const QVariant &)), this, SLOT(update()));
+        ani->start();
     }
     QWidget::mousePressEvent(event);
 }
@@ -157,6 +166,14 @@ void LovelyHeartSwitch::mouseReleaseEvent(QMouseEvent *event)
         }
 
         startSwitchAnimation();
+
+        QPropertyAnimation* ani = new QPropertyAnimation(this, "press");
+        ani->setStartValue(pressScaleProgress);
+        ani->setEndValue(1);
+        ani->setDuration(100);
+        connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
+        connect(ani, SIGNAL(valueChanged(const QVariant &)), this, SLOT(update()));
+        ani->start();
     }
     QWidget::mouseReleaseEvent(event);
 }
@@ -206,4 +223,14 @@ double LovelyHeartSwitch::getSwtchProg()
 void LovelyHeartSwitch::setSwtchProg(double p)
 {
     this->aniProgess = p;
+}
+
+double LovelyHeartSwitch::getPressProg()
+{
+    return pressScaleProgress;
+}
+
+void LovelyHeartSwitch::setPressProg(double p)
+{
+    this->pressScaleProgress = p;
 }
