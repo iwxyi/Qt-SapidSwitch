@@ -4,6 +4,7 @@
 #include <QObject>
 #include <QWidget>
 #include <QTimer>
+#include <QDebug>
 #include "math.h"
 
 class LovelyHeartSwitch : public QWidget
@@ -38,6 +39,7 @@ private:
     const double GenHao2 = sqrt(2.0);
     QPointF rightAnglePos; // 中间直角的点
     double diamondSide;      // 每个菱形单位的边长
+    double circleRadius;
 };
 
 #endif // LOVELYHEARTSWITCH_H
