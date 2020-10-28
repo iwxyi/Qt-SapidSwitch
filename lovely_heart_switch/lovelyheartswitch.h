@@ -16,20 +16,23 @@ class LovelyHeartSwitch : public QWidget
 public:
     LovelyHeartSwitch(QWidget *parent = nullptr);
 
+public slots:
     void setState(bool state);
     void setStateWithoutSignal(bool state);
     void switchState();
     void switchStateWithoutSignal();
+    void setColors(QColor on, QColor off);
 
 protected:
-    void paintEvent(QPaintEvent *) override;
-    void resizeEvent(QResizeEvent *) override;
+    void paintEvent(QPaintEvent *event) override;
+    void resizeEvent(QResizeEvent *event) override;
     void mousePressEvent(QMouseEvent *event) override;
     void mouseMoveEvent(QMouseEvent *event) override;
     void mouseReleaseEvent(QMouseEvent *event) override;
 
 private:
     void calculateGeometry();
+    QPainterPath getBgPath();
     void startSwitchAnimation();
 
     double getSwtchProg();
@@ -40,13 +43,11 @@ private:
 signals:
     void stateChanged(bool state);
 
-public slots:
-
 private:
     // 状态
     bool currentState = false; // 开关状态
     double aniProgess = 0;     // 当前动画值，趋向state，范围0~1
-    QColor colorOn = Qt::red;
+    QColor colorOn = QColor(236, 97, 139);
     QColor colorOff = Qt::lightGray;
 
     // 几何
@@ -60,6 +61,7 @@ private:
 
     // 交互
     QPoint pressPos;
+    double pressAniProg;
     bool moved = false;
     bool dragging = false;
     bool moveTargetState = false; // 滑动的目标状态，等待松手

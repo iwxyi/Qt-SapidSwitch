@@ -33,29 +33,22 @@ void LovelyHeartSwitch::switchStateWithoutSignal()
     setState(!currentState);
 }
 
-void LovelyHeartSwitch::paintEvent(QPaintEvent *)
+void LovelyHeartSwitch::setColors(QColor on, QColor off)
 {
+    this->colorOn = on;
+    this->colorOff = off;
+    update();
+}
+
+void LovelyHeartSwitch::paintEvent(QPaintEvent *event)
+{
+    QWidget::paintEvent(event);
+
     QPainter painter(this);
     painter.setRenderHint(QPainter::Antialiasing, true);
-    const double& r = diamondSide;
-    const double r_2 = r / 2;
 
     // 爱心外框路径
-    QPainterPath path;
-    path.moveTo(rightAnglePos);
-    // 右上角耳朵
-    const QPointF center1(rightAnglePos.x() + r_2/GenHao2, rightAnglePos.y() + r/2/GenHao2);
-    const QRectF rect1(center1.x()-r_2, center1.y()-r_2, r, r);
-    path.arcTo(rect1, 135, -180);
-    // 中下部分
-    const QPointF center2 = rightAnglePos;
-    const double radius2 = r;
-    const QRectF rect2(center2.x() - radius2, center2.y() - radius2, 2*radius2, 2*radius2);
-    path.arcTo(rect2, -45, -90);
-    // 左上角耳朵
-    const QPointF center3(rightAnglePos.x() - r_2/GenHao2, rightAnglePos.y() + r/2/GenHao2);
-    const QRectF rect3 = QRectF(center3.x()-r_2, center3.y()-r_2, r, r);
-    path.arcTo(rect3, -135, -180);
+    QPainterPath path = getBgPath();
 
     // 计算颜色
     QColor bg(
@@ -80,8 +73,31 @@ void LovelyHeartSwitch::paintEvent(QPaintEvent *)
     painter.fillPath(circlePath, QColor(255, 250, 250));
 }
 
-void LovelyHeartSwitch::resizeEvent(QResizeEvent *)
+QPainterPath LovelyHeartSwitch::getBgPath()
 {
+    const double& r = diamondSide;
+    const double r_2 = r / 2;
+    QPainterPath path;
+    path.moveTo(rightAnglePos);
+    // 右上角耳朵
+    const QPointF center1(rightAnglePos.x() + r_2/GenHao2, rightAnglePos.y() + r/2/GenHao2);
+    const QRectF rect1(center1.x()-r_2, center1.y()-r_2, r, r);
+    path.arcTo(rect1, 135, -180);
+    // 中下部分
+    const QPointF center2 = rightAnglePos;
+    const double radius2 = r;
+    const QRectF rect2(center2.x() - radius2, center2.y() - radius2, 2*radius2, 2*radius2);
+    path.arcTo(rect2, -45, -90);
+    // 左上角耳朵
+    const QPointF center3(rightAnglePos.x() - r_2/GenHao2, rightAnglePos.y() + r/2/GenHao2);
+    const QRectF rect3 = QRectF(center3.x()-r_2, center3.y()-r_2, r, r);
+    path.arcTo(rect3, -135, -180);
+    return path;
+}
+
+void LovelyHeartSwitch::resizeEvent(QResizeEvent *event)
+{
+    QWidget::resizeEvent(event);
     calculateGeometry();
 }
 
@@ -90,6 +106,7 @@ void LovelyHeartSwitch::mousePressEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton)
     {
         pressPos = event->pos();
+        pressAniProg = aniProgess;
         moved = false;
         dragging = false;
         prevX = pressPos.x();
@@ -128,6 +145,7 @@ void LovelyHeartSwitch::mouseMoveEvent(QMouseEvent *event)
             moveTargetState = (x > prevX ? true : false);
             prevX = x;
         }
+        event->accept();
     }
     QWidget::mouseMoveEvent(event);
 }
@@ -138,7 +156,11 @@ void LovelyHeartSwitch::mouseReleaseEvent(QMouseEvent *event)
     {
         if (!moved)
         {
-            switchState();
+            QPainterPath path = getBgPath();
+            if (path.contains(event->pos())) // 外面允许直接穿透过去（默认穿透吧）
+            {
+                switchState();
+            }
         }
         else
         {
@@ -164,6 +186,7 @@ void LovelyHeartSwitch::mouseReleaseEvent(QMouseEvent *event)
             }
             update();
         }
+        event->accept();
 
         startSwitchAnimation();
 
