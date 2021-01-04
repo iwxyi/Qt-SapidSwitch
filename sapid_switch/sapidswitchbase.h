@@ -50,6 +50,7 @@ protected:
     virtual QColor getBgColor() const;
     virtual void startSwitchAnimation();
     virtual void startSwitchAnimation(double target, int duration);
+    virtual void setSwtchProgManual(double p);
 
 private:
     double getSwtchProg();

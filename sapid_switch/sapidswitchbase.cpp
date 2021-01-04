@@ -77,7 +77,6 @@ void SapidSwitchBase::mousePressEvent(QMouseEvent *event)
     if (event->button() == Qt::LeftButton)
     {
         pressPos = event->pos();
-        pressAniProg = aniProgess;
         moved = false;
         dragging = false;
         prevX = pressPos.x();
@@ -107,11 +106,11 @@ void SapidSwitchBase::mouseMoveEvent(QMouseEvent *event)
             // 设置圆圈的位置比例
             int x = event->pos().x();
             if (x <= slideLeft)
-                aniProgess = 0;
+                setSwtchProg(0);
             else if (x >= slideRight)
-                aniProgess = 1;
+                setSwtchProg(1);
             else
-                aniProgess = static_cast<double>(x - slideLeft) / (slideRight - slideLeft);
+                setSwtchProg(static_cast<double>(x - slideLeft) / (slideRight - slideLeft));
             update();
 
             moveTargetState = (x > prevX ? true : false);
@@ -212,7 +211,7 @@ void SapidSwitchBase::startSwitchAnimation()
     if (qAbs(target-aniProgess) < 1e-4)
         return ;
     int duration = static_cast<int>(qAbs((aniProgess - target) * (slideRight - slideLeft) * 10));
-    duration = qMin(duration, duration);
+    duration = qMin(duration, switchDuration);
 
     startSwitchAnimation(target, duration);
 }
@@ -227,12 +226,17 @@ void SapidSwitchBase::startSwitchAnimation(double target, int duration)
     QPropertyAnimation* ani = new QPropertyAnimation(this, "swtch");
     ani->setStartValue(aniProgess);
     ani->setEndValue(target);
-    if (duration > 50) // 太小的话就不进行动画了
+    if (duration > 50) // 太小的话就不计算非线性动画了
         ani->setEasingCurve(curve);
     ani->setDuration(duration);
     connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
     connect(ani, SIGNAL(valueChanged(const QVariant &)), this, SLOT(update()));
     ani->start();
+}
+
+void SapidSwitchBase::setSwtchProgManual(double p)
+{
+    setSwtchProg(p);
 }
 
 double SapidSwitchBase::getSwtchProg()

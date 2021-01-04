@@ -4,10 +4,11 @@ BoundarySwitchBase::BoundarySwitchBase(QWidget *parent) : SapidSwitchBase(parent
 {
     setMinimumSize(128, 32);
 
+    setAnimationDuration(500);
     setBackground(QColor(30, 144, 255), Qt::gray);
-    setBorder(QColor(30, 144, 255), 1);
-    setAnimationDuration(600);
+    setBorder(QColor(30, 144, 255), 2);
     setAnimationEasingCurve(QEasingCurve::OutCubic);
+    calculateGeometry();
 }
 
 void BoundarySwitchBase::setType(int mode)
@@ -37,9 +38,31 @@ QSize BoundarySwitchBase::sizeHint() const
     return QSize(128, 32);
 }
 
+void BoundarySwitchBase::startSwitchAnimation(double target, int duration)
+{
+    SapidSwitchBase::startSwitchAnimation(target, duration);
+
+    // 开启边界动画
+    QPropertyAnimation* ani = new QPropertyAnimation(this, "border");
+    ani->setStartValue(borderProg);
+    ani->setEndValue(target);
+    ani->setEasingCurve(curve);
+    ani->setDuration(static_cast<int>(duration * 1.4));
+    connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
+    connect(ani, SIGNAL(valueChanged(const QVariant &)), this, SLOT(update()));
+    ani->start();
+}
+
+void BoundarySwitchBase::setSwtchProgManual(double p)
+{
+    SapidSwitchBase::setSwtchProgManual(p);
+
+    setBorderProg(p);
+}
+
 void BoundarySwitchBase::calculateGeometry()
 {
-    radius = height() / 2;
+    radius = height() / 2 - borderSize/2.0;
 }
 
 QPainterPath BoundarySwitchBase::getBgPath() const
@@ -58,7 +81,7 @@ QPainterPath BoundarySwitchBase::getBgPath() const
 
 void BoundarySwitchBase::drawBorder(QPainter &painter)
 {
-    const double prop = aniProgess;
+    const double prop = borderProg;
 
     if (mode == 1)
     {
@@ -68,24 +91,24 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
             painter.save();
             // 右半部分整体rect
             QPainterPath path;
-            QRect rect = this->rect();
-            rect.setRight(rect.width() / 2);
+            QRectF rect = this->rect();
+            rect.setRight(rect.center().x());
             path.addRoundedRect(rect, radius, radius);
             double startAngle = 0;
             double arcAngle = 360 * (0.75 - prop) / 0.75;
 
             // 去掉的部分
             QPainterPath clipPath;
-            const QPoint center = rect.center();
-            const int r = rect.width()/2;
+            const QPointF center = rect.center();
+            const double r = rect.width()/2;
             clipPath.moveTo(center);
             clipPath.lineTo(this->rect().center());
-            QRect circleRect(center.x()-r-1, center.y()-r, r*2+2, r*2);
+            QRectF circleRect(center.x()-r-1, center.y()-r, r*2+2, r*2);
             clipPath.arcTo(circleRect, startAngle, arcAngle);
             clipPath.lineTo(center);
 
             painter.setClipPath(clipPath);
-            painter.setPen(colorOff);
+            painter.setPen(QPen(colorOff, borderSize));
             painter.drawPath(path);
             painter.restore();
         }
@@ -96,24 +119,24 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
             painter.save();
             // 左半部分整体rect
             QPainterPath path;
-            QRect rect = this->rect();
-            rect.setLeft(width() / 2);
+            QRectF rect = this->rect();
+            rect.setLeft(this->width() / 2);
             path.addRoundedRect(rect, radius, radius);
             double startAngle = 180;
             double arcAngle = 360 * (prop-0.25) / 0.75;
 
             // 去掉的部分
             QPainterPath clipPath;
-            const QPoint center = rect.center();
-            const int r = rect.width()/2;
+            const QPointF center = rect.center();
+            const double r = rect.width()/2;
             clipPath.moveTo(center);
             clipPath.lineTo(this->rect().center());
-            QRect circleRect(center.x()-r-1, center.y()-r, r*2+2, r*2);
+            QRectF circleRect(center.x()-r-1, center.y()-r, r*2+2, r*2);
             clipPath.arcTo(circleRect, startAngle, -arcAngle);
             clipPath.lineTo(center);
 
             painter.setClipPath(clipPath);
-            painter.setPen(colorOn);
+            painter.setPen(QPen(colorOn, borderSize));
             painter.drawPath(path);
             painter.restore();
         }
@@ -121,8 +144,8 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
     else if (mode == 2)
     {
         painter.save();
-        QRect rect = this->rect();
-        painter.setPen(colorOff);
+        QRectF rect = this->rect();
+        painter.setPen(QPen(colorOff, borderSize));
         QPainterPath path;
         path.addRoundedRect(rect, radius, radius);
         painter.drawPath(path);
@@ -130,12 +153,11 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
         // 画动画背景
         const double totalLen = 2 * PI * radius + 2 * (rect.width() - 2 * radius);
         double currLen = totalLen * prop; // 应当动画的时长
-        painter.setPen(colorOn);
         path.clear();
-        path.moveTo(0, radius);
+        path.moveTo(borderSize/2.0, radius);
         if (currLen > 0) // 左下角四分之一个圆
         {
-            QPoint o(rect.left() + radius, radius);
+            QPointF o(rect.left() + radius, radius);
             double len = radius * PI / 2; // 90°周长
             double angle;
             if (len <= currLen) // 够长
@@ -148,11 +170,11 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
                 angle = 90 * currLen / len;
                 currLen = 0;
             }
-            path.arcTo(QRect(0, 0, radius*2, radius*2), 180, angle);
+            path.arcTo(QRectF(borderSize/2.0, borderSize/2.0, radius*2, radius*2), 180, angle);
         }
         if (currLen > 0) // 下面直线
         {
-            double len = rect.width() - 2 * radius;
+            double len = rect.right() - 2 * radius;
             double moveLen;
             if (currLen > len) // 够长
             {
@@ -164,11 +186,11 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
                 moveLen = currLen;
                 currLen = 0;
             }
-            path.lineTo(radius + moveLen, radius*2);
+            path.lineTo(borderSize/2.0 + radius + moveLen, height()-borderSize/2.0);
         }
         if (currLen > 0) // 右边半圆
         {
-            QPoint o(rect.right() - radius, radius);
+            QPointF o(rect.right() - radius, radius);
             double len = radius * PI; // 半圆周长
             double angle;
             if (len <= currLen) // 够长
@@ -181,7 +203,7 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
                 angle = 180 * currLen / len;
                 currLen = 0;
             }
-            path.arcTo(QRect(width()-2*radius, 0, radius*2, radius*2), 270, angle);
+            path.arcTo(QRectF(width()-2*radius-borderSize/2.0, borderSize/2.0, radius*2, radius*2), 270, angle);
         }
         if (currLen > 0) // 上面直线
         {
@@ -197,11 +219,11 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
                 moveLen = currLen;
                 currLen = 0;
             }
-            path.lineTo(width()-radius-moveLen, 0);
+            path.lineTo(width()-radius-moveLen-borderSize/2.0, borderSize/2.0);
         }
         if (currLen > 0) // 左上角圆
         {
-            QPoint o(rect.left() + radius, radius);
+            QPointF o(rect.left() + radius, radius);
             double len = radius * PI / 2; // 90°周长
             double angle;
             if (len <= currLen) // 够长
@@ -214,36 +236,11 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
                 angle = 90 * currLen / len;
                 currLen = 0;
             }
-            path.arcTo(QRect(0, 0, radius*2, radius*2), 90, angle);
+            path.arcTo(QRectF(borderSize/2.0, borderSize/2.0, radius*2, radius*2), 90, angle);
         }
-        painter.setPen(colorOn);
+        painter.setPen(QPen(colorOn, borderSize));
         painter.drawPath(path);
         painter.restore();
-
-        /*painter.save();
-        // 右半部分整体rect
-        QPainterPath path;
-        QRect rect = this->rect();
-        path.addRoundedRect(rect, radius, radius);
-        double startAngle = 180;
-        double arcAngle = 360 * prop / 0.75;
-
-        // 去掉的部分
-        QPainterPath clipPath;
-        const QPoint center = rect.center();
-        const int r = rect.width()/2;
-        clipPath.moveTo(center);
-        clipPath.lineTo(this->rect().center());
-        QRect circleRect(center.x()-r-1, center.y()-r, r*2+2, r*2);
-        clipPath.arcTo(circleRect, startAngle, arcAngle);
-        clipPath.lineTo(center);
-
-        painter.setPen(colorOff);
-        painter.drawPath(path);
-        painter.setClipPath(clipPath);
-        painter.setPen(colorOn);
-        painter.drawPath(path);
-        painter.restore();*/
     }
     else if (mode == 3)
     {
@@ -253,21 +250,63 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
 
 void BoundarySwitchBase::drawFg(QPainter &painter)
 {
+    if (mode == 1)
+    {
+        // 这个模式不用画前景
+    }
+    else if (mode == 2)
+    {
+        const double margin = circleOutMargin;
+        double maxDelta = (width() - margin*2) / 2;
+        double left = margin + maxDelta * (qMax(aniProgess, 0.5)-0.5) / 0.5; // 0.5~1
+        double right = width() - margin - maxDelta * (0.5 - qMin(aniProgess, 0.5)) / 0.5; // 0~0.5
+        double r = (height() - margin*2) / 2;
+        QPainterPath path;
+        path.addRoundedRect(QRectF(left, margin, right - left, height() - margin*2), r, r);
+        painter.fillPath(path, getBgColor());
+    }
+    else if (mode == 3)
+    {
 
+    }
 }
 
 void BoundarySwitchBase::drawText(QPainter &painter)
 {
     // 画OFF
-    QRect rect = this->rect();
+    QRectF rect = this->rect();
     rect.setRight(width() / 2);
     painter.setPen(colorOff);
-    painter.drawText(rect, Qt::AlignCenter, "OFF");
+    painter.drawText(rect, Qt::AlignCenter, !isTextReverse() ? "OFF" : "ON");
 
     // 画ON
     rect = this->rect();
     rect.setLeft(width() / 2);
     painter.setPen(isChecked() ? colorOn : colorOff);
-    painter.drawText(rect, Qt::AlignCenter, "ON");
+    painter.drawText(rect, Qt::AlignCenter, !isTextReverse() ? "ON" : "OFF");
+}
 
+double BoundarySwitchBase::getBorderProg() const
+{
+    return borderProg;
+}
+
+void BoundarySwitchBase::setBorderProg(double prog)
+{
+    this->borderProg = prog;
+}
+
+/**
+ * 有些是操作文字
+ * 有些是状态文字
+ * 所以要反过来
+ */
+bool BoundarySwitchBase::isTextReverse() const
+{
+    return mode != 1;
+}
+
+QRectF BoundarySwitchBase::rect() const
+{
+    return QRectF(borderSize/2.0, borderSize/2.0, width()-borderSize, height()-borderSize);
 }
