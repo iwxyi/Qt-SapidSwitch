@@ -2,7 +2,17 @@
 
 SapidSwitchBase::SapidSwitchBase(QWidget *parent) : QWidget(parent)
 {
+    calculateGeometry();
+}
 
+bool SapidSwitchBase::getState() const
+{
+    return currentState;
+}
+
+bool SapidSwitchBase::isChecked() const
+{
+    return currentState;
 }
 
 void SapidSwitchBase::setState(bool state)
@@ -28,11 +38,32 @@ void SapidSwitchBase::switchStateWithoutSignal()
     setState(!currentState);
 }
 
-void SapidSwitchBase::setColors(QColor on, QColor off)
+void SapidSwitchBase::setForeground(QColor color)
+{
+    this->colorFg = color;
+}
+
+void SapidSwitchBase::setBackground(QColor on, QColor off)
 {
     this->colorOn = on;
     this->colorOff = off;
     update();
+}
+
+void SapidSwitchBase::setBorder(QColor color, int size)
+{
+    this->colorBd = color;
+    this->borderSize = size;
+}
+
+void SapidSwitchBase::setAnimationDuration(int dur)
+{
+    this->switchDuration = dur;
+}
+
+void SapidSwitchBase::setAnimationEasingCurve(QEasingCurve curve)
+{
+    this->curve = curve;
 }
 
 void SapidSwitchBase::resizeEvent(QResizeEvent *event)
@@ -55,6 +86,7 @@ void SapidSwitchBase::mousePressEvent(QMouseEvent *event)
         ani->setStartValue(pressScaleProgress);
         ani->setEndValue(pressScale);
         ani->setDuration(100);
+        ani->setEasingCurve(QEasingCurve::InOutCubic);
         connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
         connect(ani, SIGNAL(valueChanged(const QVariant &)), this, SLOT(update()));
         ani->start();
@@ -180,18 +212,23 @@ void SapidSwitchBase::startSwitchAnimation()
     if (qAbs(target-aniProgess) < 1e-4)
         return ;
     int duration = static_cast<int>(qAbs((aniProgess - target) * (slideRight - slideLeft) * 10));
-    duration = qMin(duration, 350);
+    duration = qMin(duration, duration);
 
     startSwitchAnimation(target, duration);
 }
 
+/**
+ * 开启切换动画
+ * @param target   开关进度，0.0 ~ 1.0
+ * @param duration 动画时长。如果距离短的话不宜太长
+ */
 void SapidSwitchBase::startSwitchAnimation(double target, int duration)
 {
     QPropertyAnimation* ani = new QPropertyAnimation(this, "swtch");
     ani->setStartValue(aniProgess);
     ani->setEndValue(target);
-    if (duration > 50)
-        ani->setEasingCurve(QEasingCurve::InOutCubic);
+    if (duration > 50) // 太小的话就不进行动画了
+        ani->setEasingCurve(curve);
     ani->setDuration(duration);
     connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
     connect(ani, SIGNAL(valueChanged(const QVariant &)), this, SLOT(update()));

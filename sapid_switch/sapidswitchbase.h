@@ -3,10 +3,14 @@
 
 #include <QObject>
 #include <QWidget>
+#include <QPainter>
+#include <QPainterPath>
+#include <QResizeEvent>
+#include <QMouseEvent>
+#include <QApplication>
 #include <QDebug>
 #include <QPropertyAnimation>
 #include <QMouseEvent>
-#include <QApplication>
 #include "math.h"
 
 class SapidSwitchBase : public QWidget
@@ -17,6 +21,9 @@ class SapidSwitchBase : public QWidget
 public:
     explicit SapidSwitchBase(QWidget *parent = nullptr);
 
+    bool getState() const; // 两个相同
+    bool isChecked() const;
+
 signals:
     void stateChanged(bool state);
 
@@ -25,7 +32,12 @@ public slots:
     void setStateWithoutSignal(bool state);
     void switchState();
     void switchStateWithoutSignal();
-    void setColors(QColor on, QColor off);
+
+    void setForeground(QColor color);
+    void setBackground(QColor on, QColor off);
+    void setBorder(QColor color, int size);
+    void setAnimationDuration(int dur);
+    void setAnimationEasingCurve(QEasingCurve curve);
 
 protected:
     virtual void resizeEvent(QResizeEvent *event) override;
@@ -48,27 +60,32 @@ private:
 protected:
     // 状态
     bool currentState = false; // 开关状态
-    double aniProgess = 0;     // 当前动画值，趋向state，范围0~1
-    QColor colorOn = QColor(236, 97, 139);
+    double aniProgess = 0;     // 当前开关动画值，趋向state，范围0~1
+    QColor colorFg = QColor(255, 250, 250);
+    QColor colorOn = QColor(30, 144, 255);
     QColor colorOff = Qt::lightGray;
+    QColor colorBd = Qt::transparent;
+    int borderSize = 0;
+    int switchDuration = 350;
+    QEasingCurve curve = QEasingCurve::InOutCubic;
 
     // 几何
     const double PI = 3.1415926535;
     const double GenHao2 = sqrt(2.0);
 
-    // 交互
+    // 滑动手势
     QPoint pressPos;
-    double pressAniProg;
     bool moved = false;
     bool dragging = false;
     bool moveTargetState = false; // 滑动的目标状态，等待松手
     const double stickOnProp = 0.15; // 在两侧贴靠，不收左右滑动手势影响
     int prevX = 0;
+    double slideLeft, slideRight;  // 滑动左右判定边界
 
-    // 按压逻辑
+    // 按压缩放
     const double pressScale = 0.9; // 按压缩小动画
-    double pressScaleProgress = 1;
-    double slideLeft, slideRight;
+    double pressAniProg; // 按下去的动画进度
+    double pressScaleProgress = 1; // 按压缩小进度
 };
 
 #endif // SAPIDSWITCHBASE_H

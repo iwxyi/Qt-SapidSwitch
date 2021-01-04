@@ -1,13 +1,8 @@
-#include <QPainter>
-#include <QPainterPath>
-#include <QResizeEvent>
-#include <QMouseEvent>
-#include <QApplication>
 #include "lovelyheartswitch.h"
 
 LovelyHeartSwitch::LovelyHeartSwitch(QWidget *parent) : SapidSwitchBase(parent)
 {
-    calculateGeometry();
+    colorOn = QColor(236, 97, 139);
 }
 
 void LovelyHeartSwitch::paintEvent(QPaintEvent *event)
@@ -21,6 +16,13 @@ void LovelyHeartSwitch::paintEvent(QPaintEvent *event)
     QPainterPath path = getBgPath();
     painter.fillPath(path, getBgColor());
 
+    // 绘制边界
+    if (borderSize)
+    {
+        painter.setPen(QPen(colorBd, borderSize));
+        painter.drawPath(path);
+    }
+
     // 绘制开关圆球
     QPointF slideCenter(rightAnglePos.x(), rightAnglePos.y());
     const double slideRadius = circleRadius + circleOutBorder;
@@ -32,7 +34,7 @@ void LovelyHeartSwitch::paintEvent(QPaintEvent *event)
     QPainterPath circlePath;
     const double currentRadius = circleRadius * pressScaleProgress;
     circlePath.addEllipse(circlePos.x()-currentRadius, circlePos.y()-currentRadius, currentRadius*2, currentRadius*2);
-    painter.fillPath(circlePath, QColor(255, 250, 250));
+    painter.fillPath(circlePath, colorFg);
 }
 
 QPainterPath LovelyHeartSwitch::getBgPath() const
@@ -59,6 +61,8 @@ QPainterPath LovelyHeartSwitch::getBgPath() const
 
 void LovelyHeartSwitch::calculateGeometry()
 {
+    SapidSwitchBase::calculateGeometry();
+
     const double widthProp = GenHao2 + 1.0 - 1.0/GenHao2;
     const double heightProp = (GenHao2 - 1.0 + 2 * GenHao2) / 2 / GenHao2;
     diamondSide = qMin((width()-2)/widthProp, (height()-2)/heightProp);

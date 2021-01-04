@@ -1,14 +1,15 @@
-爱心开关
+趣味开关
 ===
 
 # 介绍
 
-爱心形状的switch开关，支持手势拖动、按压效果
+- 爱心形状的switch开关，支持手势拖动、按压效果
+
+- 线条样式的3种开关
 
 
 
 ## 截图
-
 
 
 ![截图](screenshot.gif)
@@ -17,7 +18,7 @@
 
 ## 使用
 
-1. `lovely_heart_switch`文件夹加入工程，`.pro`文件中`INCLUDEPATH+=lovely_heart_switch`
+1. `sapid_switch`文件夹加入工程，`.pro`文件中`INCLUDEPATH+=sapid_switch`
 
 2. ```C++
    LovelyHeartSwitch* swtch = new LovelyHeartSwitch(this);
