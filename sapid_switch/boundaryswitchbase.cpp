@@ -7,10 +7,6 @@ BoundarySwitchBase::BoundarySwitchBase(QWidget *parent) : SapidSwitchBase(parent
     setBorder(QColor(30, 144, 255), 1);
     setAnimationDuration(600);
     setAnimationEasingCurve(QEasingCurve::OutCubic);
-
-//    QFont font;
-//    font.setBold(true);
-//    this->setFont(font);
 }
 
 void BoundarySwitchBase::setType(int mode)
@@ -72,10 +68,9 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
             // 右半部分整体rect
             QPainterPath path;
             QRect rect = this->rect();
-            rect.setLeft(width() / 2);
-            rect.setRight(rect.right());
+            rect.setRight(rect.width() / 2);
             path.addRoundedRect(rect, radius, radius);
-            double startAngle = 180;
+            double startAngle = 0;
             double arcAngle = 360 * (0.75 - prop) / 0.75;
 
             // 去掉的部分
@@ -102,9 +97,9 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
             // 左半部分整体rect
             QPainterPath path;
             QRect rect = this->rect();
-            rect.setRight(rect.width() / 2);
+            rect.setLeft(width() / 2);
             path.addRoundedRect(rect, radius, radius);
-            double startAngle = 0;
+            double startAngle = 180;
             double arcAngle = 360 * (prop-0.25) / 0.75;
 
             // 去掉的部分
@@ -114,7 +109,7 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
             clipPath.moveTo(center);
             clipPath.lineTo(this->rect().center());
             QRect circleRect(center.x()-r-1, center.y()-r, r*2+2, r*2);
-            clipPath.arcTo(circleRect, startAngle, arcAngle);
+            clipPath.arcTo(circleRect, startAngle, -arcAngle);
             clipPath.lineTo(center);
 
             painter.setClipPath(clipPath);
@@ -133,15 +128,16 @@ void BoundarySwitchBase::drawFg(QPainter &painter)
 
 void BoundarySwitchBase::drawText(QPainter &painter)
 {
-    // 画ON
+    // 画OFF
     QRect rect = this->rect();
     rect.setRight(width() / 2);
+    painter.setPen(colorOff);
+    painter.drawText(rect, Qt::AlignCenter, "OFF");
+
+    // 画ON
+    rect = this->rect();
+    rect.setLeft(width() / 2);
     painter.setPen(isChecked() ? colorOn : colorOff);
     painter.drawText(rect, Qt::AlignCenter, "ON");
 
-    // 画OFF
-    rect = this->rect();
-    rect.setLeft(width() / 2);
-    painter.setPen(colorOff);
-    painter.drawText(rect, Qt::AlignCenter, "OFF");
 }
