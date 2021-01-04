@@ -1,107 +1,47 @@
-#include <QPainter>
-#include <QPainterPath>
-#include <QResizeEvent>
-#include <QMouseEvent>
-#include <QApplication>
-#include "lovelyheartswitch.h"
+#include "sapidswitchbase.h"
 
-LovelyHeartSwitch::LovelyHeartSwitch(QWidget *parent) : QWidget(parent)
+SapidSwitchBase::SapidSwitchBase(QWidget *parent) : QWidget(parent)
 {
-    calculateGeometry();
+
 }
 
-void LovelyHeartSwitch::setState(bool state)
+void SapidSwitchBase::setState(bool state)
 {
     setStateWithoutSignal(state);
     emit stateChanged(currentState);
 }
 
-void LovelyHeartSwitch::setStateWithoutSignal(bool state)
+void SapidSwitchBase::setStateWithoutSignal(bool state)
 {
     this->currentState = state;
     startSwitchAnimation();
 }
 
-void LovelyHeartSwitch::switchState()
+void SapidSwitchBase::switchState()
 {
     switchStateWithoutSignal();
     emit stateChanged(currentState);
 }
 
-void LovelyHeartSwitch::switchStateWithoutSignal()
+void SapidSwitchBase::switchStateWithoutSignal()
 {
     setState(!currentState);
 }
 
-void LovelyHeartSwitch::setColors(QColor on, QColor off)
+void SapidSwitchBase::setColors(QColor on, QColor off)
 {
     this->colorOn = on;
     this->colorOff = off;
     update();
 }
 
-void LovelyHeartSwitch::paintEvent(QPaintEvent *event)
-{
-    QWidget::paintEvent(event);
-
-    QPainter painter(this);
-    painter.setRenderHint(QPainter::Antialiasing, true);
-
-    // 爱心外框路径
-    QPainterPath path = getBgPath();
-
-    // 计算颜色
-    QColor bg(
-                colorOff.red() + (colorOn.red() - colorOff.red())*aniProgess,
-                colorOff.green() + (colorOn.green() - colorOff.green())*aniProgess,
-                colorOff.blue() + (colorOn.blue() - colorOff.blue())*aniProgess,
-                colorOff.alpha() + (colorOn.alpha() - colorOff.alpha())*aniProgess
-                );
-    painter.fillPath(path, bg);
-
-    // 绘制开关状态
-    QPointF slideCenter(rightAnglePos.x(), rightAnglePos.y());
-    const double slideRadius = circleRadius + circleOutBorder;
-    QRectF slideRect(slideCenter.x()-slideRadius, slideCenter.y()-slideRadius, slideRadius*2, slideRadius*2);
-    QPainterPath circleSlidePath;
-    circleSlidePath.moveTo(rightAnglePos.x()-slideRadius/GenHao2, rightAnglePos.y()+slideRadius/GenHao2);
-    circleSlidePath.arcTo(slideRect, -135, 90);
-    QPointF circlePos = circleSlidePath.pointAtPercent(aniProgess);
-    QPainterPath circlePath;
-    const double currentRadius = circleRadius * pressScaleProgress;
-    circlePath.addEllipse(circlePos.x()-currentRadius, circlePos.y()-currentRadius, currentRadius*2, currentRadius*2);
-    painter.fillPath(circlePath, QColor(255, 250, 250));
-}
-
-QPainterPath LovelyHeartSwitch::getBgPath()
-{
-    const double& r = diamondSide;
-    const double r_2 = r / 2;
-    QPainterPath path;
-    path.moveTo(rightAnglePos);
-    // 右上角耳朵
-    const QPointF center1(rightAnglePos.x() + r_2/GenHao2, rightAnglePos.y() + r/2/GenHao2);
-    const QRectF rect1(center1.x()-r_2, center1.y()-r_2, r, r);
-    path.arcTo(rect1, 135, -180);
-    // 中下部分
-    const QPointF center2 = rightAnglePos;
-    const double radius2 = r;
-    const QRectF rect2(center2.x() - radius2, center2.y() - radius2, 2*radius2, 2*radius2);
-    path.arcTo(rect2, -45, -90);
-    // 左上角耳朵
-    const QPointF center3(rightAnglePos.x() - r_2/GenHao2, rightAnglePos.y() + r/2/GenHao2);
-    const QRectF rect3 = QRectF(center3.x()-r_2, center3.y()-r_2, r, r);
-    path.arcTo(rect3, -135, -180);
-    return path;
-}
-
-void LovelyHeartSwitch::resizeEvent(QResizeEvent *event)
+void SapidSwitchBase::resizeEvent(QResizeEvent *event)
 {
     QWidget::resizeEvent(event);
     calculateGeometry();
 }
 
-void LovelyHeartSwitch::mousePressEvent(QMouseEvent *event)
+void SapidSwitchBase::mousePressEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
@@ -122,7 +62,7 @@ void LovelyHeartSwitch::mousePressEvent(QMouseEvent *event)
     QWidget::mousePressEvent(event);
 }
 
-void LovelyHeartSwitch::mouseMoveEvent(QMouseEvent *event)
+void SapidSwitchBase::mouseMoveEvent(QMouseEvent *event)
 {
     if (event->buttons() & Qt::LeftButton)
     {
@@ -150,7 +90,7 @@ void LovelyHeartSwitch::mouseMoveEvent(QMouseEvent *event)
     QWidget::mouseMoveEvent(event);
 }
 
-void LovelyHeartSwitch::mouseReleaseEvent(QMouseEvent *event)
+void SapidSwitchBase::mouseReleaseEvent(QMouseEvent *event)
 {
     if (event->button() == Qt::LeftButton)
     {
@@ -202,24 +142,39 @@ void LovelyHeartSwitch::mouseReleaseEvent(QMouseEvent *event)
 }
 
 /**
- * 计算各个点的恰当坐标，以填充整个矩形
+ * 计算各个点的恰当坐标，以尽量填充整个矩形
  */
-void LovelyHeartSwitch::calculateGeometry()
+void SapidSwitchBase::calculateGeometry()
 {
-    const double widthProp = GenHao2 + 1.0 - 1.0/GenHao2;
-    const double heightProp = (GenHao2 - 1.0 + 2 * GenHao2) / 2 / GenHao2;
-    diamondSide = qMin((width()-2)/widthProp, (height()-2)/heightProp);
-    circleRadius = diamondSide/2-2;
-    const double topProp = (GenHao2-1)/2/GenHao2/heightProp;
-    rightAnglePos = QPointF(width()/2,
-                           diamondSide*heightProp * topProp + (height()-diamondSide*heightProp)/2);
-
-    const double slideRadius = circleRadius + circleOutBorder;
-    slideLeft = rightAnglePos.x()-slideRadius/GenHao2;
-    slideRight = rightAnglePos.x()+slideRadius/GenHao2;
+    // 计算手势拖拽的位置
+    slideLeft = 0;
+    slideRight = width();
 }
 
-void LovelyHeartSwitch::startSwitchAnimation()
+/**
+ * 获取整个背景的路径（支持不规则图形）
+ */
+QPainterPath SapidSwitchBase::getBgPath() const
+{
+    QPainterPath path;
+    path.addRect(rect());
+    return path;
+}
+
+/**
+ * 根据动画进度返回对应颜色
+ */
+QColor SapidSwitchBase::getBgColor() const
+{
+    return QColor(
+                static_cast<int>(colorOff.red() + (colorOn.red() - colorOff.red())*aniProgess),
+                static_cast<int>(colorOff.green() + (colorOn.green() - colorOff.green())*aniProgess),
+                static_cast<int>(colorOff.blue() + (colorOn.blue() - colorOff.blue())*aniProgess),
+                static_cast<int>(colorOff.alpha() + (colorOn.alpha() - colorOff.alpha())*aniProgess)
+            );
+}
+
+void SapidSwitchBase::startSwitchAnimation()
 {
     const double target = currentState ? 1 : 0;
     if (qAbs(target-aniProgess) < 1e-4)
@@ -227,6 +182,11 @@ void LovelyHeartSwitch::startSwitchAnimation()
     int duration = static_cast<int>(qAbs((aniProgess - target) * (slideRight - slideLeft) * 10));
     duration = qMin(duration, 350);
 
+    startSwitchAnimation(target, duration);
+}
+
+void SapidSwitchBase::startSwitchAnimation(double target, int duration)
+{
     QPropertyAnimation* ani = new QPropertyAnimation(this, "swtch");
     ani->setStartValue(aniProgess);
     ani->setEndValue(target);
@@ -238,22 +198,22 @@ void LovelyHeartSwitch::startSwitchAnimation()
     ani->start();
 }
 
-double LovelyHeartSwitch::getSwtchProg()
+double SapidSwitchBase::getSwtchProg()
 {
     return aniProgess;
 }
 
-void LovelyHeartSwitch::setSwtchProg(double p)
+void SapidSwitchBase::setSwtchProg(double p)
 {
     this->aniProgess = p;
 }
 
-double LovelyHeartSwitch::getPressProg()
+double SapidSwitchBase::getPressProg()
 {
     return pressScaleProgress;
 }
 
-void LovelyHeartSwitch::setPressProg(double p)
+void SapidSwitchBase::setPressProg(double p)
 {
     this->pressScaleProgress = p;
 }

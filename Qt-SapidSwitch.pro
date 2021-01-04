@@ -16,16 +16,18 @@ DEFINES += QT_DEPRECATED_WARNINGS
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 INCLUDEPATH += \
-    lovely_heart_switch/
+    sapid_switch/
 
 SOURCES += \
-    lovely_heart_switch/lovelyheartswitch.cpp \
+    sapid_switch/lovelyheartswitch.cpp \
     main.cpp \
-    mainwindow.cpp
+    mainwindow.cpp \
+    sapid_switch/sapidswitchbase.cpp
 
 HEADERS += \
-    lovely_heart_switch/lovelyheartswitch.h \
-    mainwindow.h
+    sapid_switch/lovelyheartswitch.h \
+    mainwindow.h \
+    sapid_switch/sapidswitchbase.h
 
 FORMS += \
     mainwindow.ui
