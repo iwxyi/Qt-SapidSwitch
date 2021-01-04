@@ -4,8 +4,8 @@ BoundarySwitchBase::BoundarySwitchBase(QWidget *parent) : SapidSwitchBase(parent
 {
     setMinimumSize(128, 32);
 
-    setAnimationDuration(500);
-    setBackground(QColor(30, 144, 255), Qt::gray);
+    setAnimationDuration(600);
+    setBackground(QColor(30, 144, 255), Qt::lightGray);
     setBorder(QColor(30, 144, 255), 2);
     setAnimationEasingCurve(QEasingCurve::OutCubic);
     calculateGeometry();
@@ -47,7 +47,7 @@ void BoundarySwitchBase::startSwitchAnimation(double target, int duration)
     ani->setStartValue(borderProg);
     ani->setEndValue(target);
     ani->setEasingCurve(curve);
-    ani->setDuration(static_cast<int>(duration * 1.4));
+    ani->setDuration(static_cast<int>(duration * 1.5));
     connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
     connect(ani, SIGNAL(valueChanged(const QVariant &)), this, SLOT(update()));
     ani->start();
@@ -244,7 +244,86 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
     }
     else if (mode == 3)
     {
+        painter.save();
+        QRectF rect = this->rect();
+        painter.setPen(QPen(colorOff, borderSize));
+        QPainterPath path;
+        path.addRect(rect);
+        painter.drawPath(path);
 
+        const double w = rect.width(), h = rect.height();
+        const double totalLen = w*2 + h*2;
+        double currLen = totalLen * prop;
+        path.clear();
+        path.moveTo(borderSize/2.0, borderSize/2.0);
+        if (currLen > 0) // 左边
+        {
+            double len = h;
+            double moveLen;
+            if (len < currLen) // 够长
+            {
+                moveLen = len;
+                currLen -= moveLen;
+            }
+            else
+            {
+                moveLen = currLen;
+                currLen = 0;
+            }
+            path.lineTo(rect.left(), rect.top() + moveLen);
+        }
+        if (currLen > 0) // 下边
+        {
+            double len = w;
+            double moveLen;
+            if (len < currLen) // 够长
+            {
+                moveLen = len;
+                currLen -= moveLen;
+            }
+            else
+            {
+                moveLen = currLen;
+                currLen = 0;
+            }
+            path.lineTo(rect.left() + moveLen, rect.bottom());
+        }
+        if (currLen > 0) // 右边
+        {
+            double len = h;
+            double moveLen;
+            if (len < currLen) // 够长
+            {
+                moveLen = len;
+                currLen -= moveLen;
+            }
+            else
+            {
+                moveLen = currLen;
+                currLen = 0;
+            }
+            path.lineTo(rect.right(), rect.bottom()-moveLen);
+        }
+        if (currLen > 0) // 上边
+        {
+            double len = w;
+            double moveLen;
+            if (len < currLen) // 够长
+            {
+                moveLen = len;
+                currLen -= moveLen;
+            }
+            else
+            {
+                moveLen = currLen;
+                currLen = 0;
+            }
+            path.lineTo(rect.right() - moveLen, rect.top());
+        }
+
+        painter.setPen(QPen(colorOn, borderSize));
+        painter.drawPath(path);
+        painter.restore();
     }
 }
 
@@ -256,10 +335,11 @@ void BoundarySwitchBase::drawFg(QPainter &painter)
     }
     else if (mode == 2)
     {
+        const double prop = aniProgess;
         const double margin = circleOutMargin;
         double maxDelta = (width() - margin*2) / 2;
-        double left = margin + maxDelta * (qMax(aniProgess, 0.5)-0.5) / 0.5; // 0.5~1
-        double right = width() - margin - maxDelta * (0.5 - qMin(aniProgess, 0.5)) / 0.5; // 0~0.5
+        double left = margin + maxDelta * (qMax(prop, 0.5)-0.5) / 0.5; // 0.5~1
+        double right = width() - margin - maxDelta * (0.5 - qMin(prop, 0.5)) / 0.5; // 0~0.5
         double r = (height() - margin*2) / 2;
         QPainterPath path;
         path.addRoundedRect(QRectF(left, margin, right - left, height() - margin*2), r, r);
@@ -267,7 +347,23 @@ void BoundarySwitchBase::drawFg(QPainter &painter)
     }
     else if (mode == 3)
     {
-
+        const double prop = aniProgess;
+        const double fixedX = borderSize+2; // 偏向的一半（上下各加减，即X差乘二）
+        const QRectF rect(this->rect());
+        const double w = rect.width()/2;
+        QPainterPath path;
+        const double left = rect.left() + w * prop;
+        const double right = left + w;
+        const double topLeft = left - fixedX * prop;
+        const double bottomLeft = left + fixedX * prop;
+        const double topRight = right + fixedX * (1-prop);
+        const double bottomRight = right - fixedX * (1-prop);
+        path.moveTo(topLeft, rect.top());
+        path.lineTo(bottomLeft, rect.bottom());
+        path.lineTo(bottomRight, rect.bottom());
+        path.lineTo(topRight, rect.top());
+        path.lineTo(topLeft, rect.top());
+        painter.fillPath(path, getBgColor());
     }
 }
 
@@ -282,7 +378,7 @@ void BoundarySwitchBase::drawText(QPainter &painter)
     // 画ON
     rect = this->rect();
     rect.setLeft(width() / 2);
-    painter.setPen(isChecked() ? colorOn : colorOff);
+    painter.setPen((!isTextReverse() && isChecked()) ? colorOn : colorOff);
     painter.drawText(rect, Qt::AlignCenter, !isTextReverse() ? "ON" : "OFF");
 }
 
