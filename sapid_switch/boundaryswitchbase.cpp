@@ -26,11 +26,11 @@ void BoundarySwitchBase::paintEvent(QPaintEvent *event)
     // 画边界
     drawBorder(painter);
 
+    // 画文字（会被上面的开关覆盖）
+    drawText(painter);
+
     // 画开关
     drawFg(painter);
-
-    // 画文字
-    drawText(painter);
 }
 
 QSize BoundarySwitchBase::sizeHint() const
@@ -370,6 +370,7 @@ void BoundarySwitchBase::drawFg(QPainter &painter)
 void BoundarySwitchBase::drawText(QPainter &painter)
 {
     // 画OFF
+    // if (isTextReverse() && getState()) // 分状态画？
     QRectF rect = this->rect();
     rect.setRight(width() / 2);
     painter.setPen(colorOff);
