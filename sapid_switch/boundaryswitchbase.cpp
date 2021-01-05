@@ -7,7 +7,7 @@ BoundarySwitchBase::BoundarySwitchBase(QWidget *parent) : SapidSwitchBase(parent
     setAnimationDuration(600);
     setBackground(QColor(30, 144, 255), Qt::lightGray);
     setBorder(QColor(30, 144, 255), 2);
-    setAnimationEasingCurve(QEasingCurve::OutCubic);
+    setAnimationEasingCurve(QEasingCurve::OutCirc);
     calculateGeometry();
 }
 
