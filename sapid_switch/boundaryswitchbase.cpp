@@ -55,13 +55,13 @@ void BoundarySwitchBase::startSwitchAnimation(double target, int duration)
 
 void BoundarySwitchBase::setSwtchProgManual(double p)
 {
-    SapidSwitchBase::setSwtchProgManual(p);
-
     setBorderProg(p);
+    SapidSwitchBase::setSwtchProgManual(p);
 }
 
 void BoundarySwitchBase::calculateGeometry()
 {
+    SapidSwitchBase::calculateGeometry();
     radius = height() / 2 - borderSize/2.0;
 }
 

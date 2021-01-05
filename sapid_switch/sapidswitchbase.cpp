@@ -106,11 +106,11 @@ void SapidSwitchBase::mouseMoveEvent(QMouseEvent *event)
             // 设置圆圈的位置比例
             int x = event->pos().x();
             if (x <= slideLeft)
-                setSwtchProg(0);
+                setSwtchProgManual(0);
             else if (x >= slideRight)
-                setSwtchProg(1);
+                setSwtchProgManual(1);
             else
-                setSwtchProg(static_cast<double>(x - slideLeft) / (slideRight - slideLeft));
+                setSwtchProgManual(static_cast<double>(x - slideLeft) / (slideRight - slideLeft));
             update();
 
             moveTargetState = (x > prevX ? true : false);
@@ -178,8 +178,8 @@ void SapidSwitchBase::mouseReleaseEvent(QMouseEvent *event)
 void SapidSwitchBase::calculateGeometry()
 {
     // 计算手势拖拽的位置
-    slideLeft = 0;
-    slideRight = width();
+    slideLeft = borderSize/2.0;
+    slideRight = width()-borderSize;
 }
 
 /**
@@ -208,8 +208,11 @@ QColor SapidSwitchBase::getBgColor() const
 void SapidSwitchBase::startSwitchAnimation()
 {
     const double target = currentState ? 1 : 0;
-    if (qAbs(target-aniProgess) < 1e-4)
+    if (qAbs(target-aniProgess) < 1e-4) // 不太需要动画了
+    {
+        startNoSwitchAnimation();
         return ;
+    }
     int duration = static_cast<int>(qAbs((aniProgess - target) * (slideRight - slideLeft) * 10));
     duration = qMin(duration, switchDuration);
 
@@ -234,6 +237,19 @@ void SapidSwitchBase::startSwitchAnimation(double target, int duration)
     ani->start();
 }
 
+/**
+ * 手势滑动开关后，开关本体不需要重新切换
+ * 但是如果派生的话，比如边缘动画，还是需要重新动一下的
+ * 手势滑动并松开后，执行动画
+ */
+void SapidSwitchBase::startNoSwitchAnimation()
+{
+
+}
+
+/**
+ * 手动设置的切换控件
+ */
 void SapidSwitchBase::setSwtchProgManual(double p)
 {
     setSwtchProg(p);
