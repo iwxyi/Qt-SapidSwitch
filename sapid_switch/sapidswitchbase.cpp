@@ -10,15 +10,18 @@ bool SapidSwitchBase::getState() const
     return currentState;
 }
 
+/// 同上，一模一样
 bool SapidSwitchBase::isChecked() const
 {
-    return currentState;
+    return getState();
 }
 
 void SapidSwitchBase::setState(bool state)
 {
+    bool toggle = state != currentState;
     setStateWithoutSignal(state);
-    emit stateChanged(currentState);
+    if (toggle)
+        emit stateChanged(currentState);
 }
 
 void SapidSwitchBase::setStateWithoutSignal(bool state)
@@ -27,13 +30,13 @@ void SapidSwitchBase::setStateWithoutSignal(bool state)
     startSwitchAnimation();
 }
 
-void SapidSwitchBase::switchState()
+void SapidSwitchBase::toggleState()
 {
-    switchStateWithoutSignal();
+    toggleStateWithoutSignal();
     emit stateChanged(currentState);
 }
 
-void SapidSwitchBase::switchStateWithoutSignal()
+void SapidSwitchBase::toggleStateWithoutSignal()
 {
     setState(!currentState);
 }
@@ -111,7 +114,6 @@ void SapidSwitchBase::mouseMoveEvent(QMouseEvent *event)
                 setSwtchProgManual(1);
             else
                 setSwtchProgManual(static_cast<double>(x - slideLeft) / (slideRight - slideLeft));
-            update();
 
             moveTargetState = (x > prevX ? true : false);
             prevX = x;
@@ -130,7 +132,7 @@ void SapidSwitchBase::mouseReleaseEvent(QMouseEvent *event)
             QPainterPath path = getBgPath();
             if (path.contains(event->pos())) // 外面允许直接穿透过去（默认穿透吧）
             {
-                switchState();
+                toggleState();
             }
         }
         else
@@ -166,7 +168,6 @@ void SapidSwitchBase::mouseReleaseEvent(QMouseEvent *event)
         ani->setEndValue(1);
         ani->setDuration(100);
         connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
-        connect(ani, SIGNAL(valueChanged(const QVariant &)), this, SLOT(update()));
         ani->start();
     }
     QWidget::mouseReleaseEvent(event);
@@ -197,11 +198,16 @@ QPainterPath SapidSwitchBase::getBgPath() const
  */
 QColor SapidSwitchBase::getBgColor() const
 {
+    double prop = aniProgess;
+    if (prop < 0)
+        prop = 0;
+    else if (prop > 1)
+        prop = 1;
     return QColor(
-                static_cast<int>(colorOff.red() + (colorOn.red() - colorOff.red())*aniProgess),
-                static_cast<int>(colorOff.green() + (colorOn.green() - colorOff.green())*aniProgess),
-                static_cast<int>(colorOff.blue() + (colorOn.blue() - colorOff.blue())*aniProgess),
-                static_cast<int>(colorOff.alpha() + (colorOn.alpha() - colorOff.alpha())*aniProgess)
+                static_cast<int>(colorOff.red() + (colorOn.red() - colorOff.red())*prop),
+                static_cast<int>(colorOff.green() + (colorOn.green() - colorOff.green())*prop),
+                static_cast<int>(colorOff.blue() + (colorOn.blue() - colorOff.blue())*prop),
+                static_cast<int>(colorOff.alpha() + (colorOn.alpha() - colorOff.alpha())*prop)
             );
 }
 
@@ -263,6 +269,7 @@ double SapidSwitchBase::getSwtchProg()
 void SapidSwitchBase::setSwtchProg(double p)
 {
     this->aniProgess = p;
+    update();
 }
 
 double SapidSwitchBase::getPressProg()
@@ -273,4 +280,5 @@ double SapidSwitchBase::getPressProg()
 void SapidSwitchBase::setPressProg(double p)
 {
     this->pressScaleProgress = p;
+    update();
 }

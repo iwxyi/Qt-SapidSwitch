@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>188</width>
-    <height>302</height>
+    <width>326</width>
+    <height>203</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -27,8 +27,8 @@
    <widget class="BoundarySwitchBase" name="widget_2" native="true">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>110</y>
+      <x>170</x>
+      <y>10</y>
       <width>101</width>
       <height>31</height>
      </rect>
@@ -37,8 +37,8 @@
    <widget class="BoundarySwitchBase" name="widget_3" native="true">
     <property name="geometry">
      <rect>
-      <x>20</x>
-      <y>160</y>
+      <x>170</x>
+      <y>60</y>
       <width>101</width>
       <height>31</height>
      </rect>
@@ -47,8 +47,18 @@
    <widget class="BoundarySwitchBase" name="widget_4" native="true">
     <property name="geometry">
      <rect>
+      <x>170</x>
+      <y>110</y>
+      <width>101</width>
+      <height>31</height>
+     </rect>
+    </property>
+   </widget>
+   <widget class="NormalSwitch" name="widget_5" native="true">
+    <property name="geometry">
+     <rect>
       <x>20</x>
-      <y>210</y>
+      <y>110</y>
       <width>101</width>
       <height>31</height>
      </rect>
@@ -60,7 +70,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>188</width>
+     <width>326</width>
      <height>23</height>
     </rect>
    </property>
@@ -78,6 +88,12 @@
    <class>BoundarySwitchBase</class>
    <extends>QWidget</extends>
    <header>boundaryswitchbase.h</header>
+   <container>1</container>
+  </customwidget>
+  <customwidget>
+   <class>NormalSwitch</class>
+   <extends>QWidget</extends>
+   <header>normalswitch.h</header>
    <container>1</container>
   </customwidget>
  </customwidgets>

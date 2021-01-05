@@ -24,13 +24,13 @@ protected:
     virtual void drawFg(QPainter &painter);
     virtual void drawText(QPainter &painter);
 
-private:
+protected:
     double getBorderProg() const;
     void setBorderProg(double prog);
     bool isTextReverse() const;
     QRectF rect() const;
 
-private:
+protected:
     double borderProg;
     int mode = 0;
     double radius = 0; // 圆角矩形的半径 = height()/2

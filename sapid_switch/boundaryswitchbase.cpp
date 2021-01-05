@@ -390,6 +390,7 @@ double BoundarySwitchBase::getBorderProg() const
 void BoundarySwitchBase::setBorderProg(double prog)
 {
     this->borderProg = prog;
+    update();
 }
 
 /**

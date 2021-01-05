@@ -21,7 +21,7 @@ class SapidSwitchBase : public QWidget
 public:
     explicit SapidSwitchBase(QWidget *parent = nullptr);
 
-    bool getState() const; // 两个相同
+    bool getState() const;
     bool isChecked() const;
 
 signals:
@@ -30,12 +30,13 @@ signals:
 public slots:
     void setState(bool state);
     void setStateWithoutSignal(bool state);
-    void switchState();
-    void switchStateWithoutSignal();
+    void toggleState();
+    void toggleStateWithoutSignal();
 
     void setForeground(QColor color);
     void setBackground(QColor on, QColor off);
     void setBorder(QColor color, int size);
+
     void setAnimationDuration(int dur);
     void setAnimationEasingCurve(QEasingCurve curve);
 

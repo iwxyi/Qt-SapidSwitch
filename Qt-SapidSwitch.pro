@@ -23,12 +23,14 @@ SOURCES += \
     sapid_switch/lovelyheartswitch.cpp \
     main.cpp \
     mainwindow.cpp \
+    sapid_switch/normalswitch.cpp \
     sapid_switch/sapidswitchbase.cpp
 
 HEADERS += \
     sapid_switch/boundaryswitchbase.h \
     sapid_switch/lovelyheartswitch.h \
     mainwindow.h \
+    sapid_switch/normalswitch.h \
     sapid_switch/sapidswitchbase.h
 
 FORMS += \
