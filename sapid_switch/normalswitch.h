@@ -6,7 +6,10 @@
 class NormalSwitch : public BoundarySwitchBase
 {
 public:
-    NormalSwitch(QWidget* parent = nullptr);
+    NormalSwitch(QWidget* parent);
+    NormalSwitch(bool state, QWidget* parent);
+
+    virtual void setSuitableHeight(int h) override;
 
 protected:
     virtual void calculateGeometry() override;
@@ -14,7 +17,7 @@ protected:
     virtual QPainterPath getBgPath() const override;
 
 private:
-    QRectF bgRect;
+    QRectF bgRect; // 背景圆角矩形的位置
 };
 
 #endif // NORMALSWITCH_H

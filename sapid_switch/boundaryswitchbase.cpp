@@ -2,13 +2,29 @@
 
 BoundarySwitchBase::BoundarySwitchBase(QWidget *parent) : SapidSwitchBase(parent)
 {
-    setMinimumSize(128, 32);
+    setMinimumSize(96, 24);
 
     setAnimationDuration(600);
     setBackground(QColor(30, 144, 255), Qt::lightGray);
     setBorder(QColor(30, 144, 255), 2);
     setAnimationEasingCurve(QEasingCurve::OutCirc);
     calculateGeometry();
+}
+
+BoundarySwitchBase::BoundarySwitchBase(int type, QWidget *parent) : BoundarySwitchBase(parent)
+{
+    setType(type);
+}
+
+BoundarySwitchBase::BoundarySwitchBase(bool state, QWidget *parent) : BoundarySwitchBase(parent)
+{
+    setState(state);
+}
+
+BoundarySwitchBase::BoundarySwitchBase(int type, bool state, QWidget *parent) : BoundarySwitchBase(parent)
+{
+    setType(type);
+    setState(state);
 }
 
 void BoundarySwitchBase::setType(int mode)
@@ -151,14 +167,14 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
         painter.drawPath(path);
 
         // 画动画背景
-        const double totalLen = 2 * PI * radius + 2 * (rect.width() - 2 * radius);
+        const double totalLen = 2 * sapid_PI * radius + 2 * (rect.width() - 2 * radius);
         double currLen = totalLen * prop; // 应当动画的时长
         path.clear();
         path.moveTo(borderSize/2.0, radius);
         if (currLen > 0) // 左下角四分之一个圆
         {
             QPointF o(rect.left() + radius, radius);
-            double len = radius * PI / 2; // 90°周长
+            double len = radius * sapid_PI / 2; // 90°周长
             double angle;
             if (len <= currLen) // 够长
             {
@@ -191,7 +207,7 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
         if (currLen > 0) // 右边半圆
         {
             QPointF o(rect.right() - radius, radius);
-            double len = radius * PI; // 半圆周长
+            double len = radius * sapid_PI; // 半圆周长
             double angle;
             if (len <= currLen) // 够长
             {
@@ -224,7 +240,7 @@ void BoundarySwitchBase::drawBorder(QPainter &painter)
         if (currLen > 0) // 左上角圆
         {
             QPointF o(rect.left() + radius, radius);
-            double len = radius * PI / 2; // 90°周长
+            double len = radius * sapid_PI / 2; // 90°周长
             double angle;
             if (len <= currLen) // 够长
             {

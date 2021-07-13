@@ -5,6 +5,11 @@ LovelyHeartSwitch::LovelyHeartSwitch(QWidget *parent) : SapidSwitchBase(parent)
     colorOn = QColor(236, 97, 139);
 }
 
+LovelyHeartSwitch::LovelyHeartSwitch(bool state, QWidget *parent) : LovelyHeartSwitch(parent)
+{
+    setState(state);
+}
+
 void LovelyHeartSwitch::paintEvent(QPaintEvent *event)
 {
     SapidSwitchBase::paintEvent(event);

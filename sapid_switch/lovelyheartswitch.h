@@ -7,7 +7,8 @@ class LovelyHeartSwitch : public SapidSwitchBase
 {
     Q_OBJECT
 public:
-    LovelyHeartSwitch(QWidget *parent = nullptr);
+    LovelyHeartSwitch(QWidget *parent);
+    LovelyHeartSwitch(bool state, QWidget* parent);
 
 protected:
     void paintEvent(QPaintEvent *event) override;

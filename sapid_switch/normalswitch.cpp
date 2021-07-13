@@ -2,14 +2,26 @@
 
 NormalSwitch::NormalSwitch(QWidget *parent) : BoundarySwitchBase(parent)
 {
+    setMinimumSize(60, 20);
     setAnimationEasingCurve(QEasingCurve::OutBack);
     setForeground(Qt::white);
     setBorder(Qt::gray, 2);
     circleOutMargin = 2;
 }
 
+NormalSwitch::NormalSwitch(bool state, QWidget *parent) : NormalSwitch(parent)
+{
+    setState(state);
+}
+
+void NormalSwitch::setSuitableHeight(int h)
+{
+    BoundarySwitchBase::setSuitableHeight(h);
+}
+
 void NormalSwitch::calculateGeometry()
 {
+    BoundarySwitchBase::calculateGeometry();
     QRectF rect = this->rect();
     double l = rect.left() + rect.width()*0.08;
     double r = rect.right() - rect.width()*0.08;
@@ -29,7 +41,7 @@ void NormalSwitch::paintEvent(QPaintEvent *)
     painter.setRenderHint(QPainter::SmoothPixmapTransform, true);
     painter.fillPath(path, QBrush(getBgColor()));
 
-    // 计算指示球位置
+    // 计算指示球进度
     double l = bgRect.left() + radius - circleOutMargin;
     double r = bgRect.right() - radius + circleOutMargin;
     double x = l + (r - l) * aniProgess;

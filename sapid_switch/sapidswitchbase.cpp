@@ -16,6 +16,13 @@ bool SapidSwitchBase::isChecked() const
     return getState();
 }
 
+/// 根据高度，自动调整宽度
+/// 默认为三倍高度
+void SapidSwitchBase::setSuitableHeight(int h)
+{
+    setMaximumSize(h * 3, h);
+}
+
 void SapidSwitchBase::setState(bool state)
 {
     bool toggle = state != currentState;
@@ -92,6 +99,7 @@ void SapidSwitchBase::mousePressEvent(QMouseEvent *event)
         connect(ani, SIGNAL(finished()), ani, SLOT(deleteLater()));
         connect(ani, SIGNAL(valueChanged(const QVariant &)), this, SLOT(update()));
         ani->start();
+        return ;
     }
     QWidget::mousePressEvent(event);
 }

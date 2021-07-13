@@ -8,11 +8,14 @@ class BoundarySwitchBase : public SapidSwitchBase
     Q_OBJECT
     Q_PROPERTY(double border READ getBorderProg WRITE setBorderProg)
 public:
-    BoundarySwitchBase(QWidget* parent = nullptr);
+    BoundarySwitchBase(QWidget* parent);
+    BoundarySwitchBase(int type, QWidget* parent);
+    BoundarySwitchBase(bool state, QWidget* parent);
+    BoundarySwitchBase(int type, bool state, QWidget* parent);
     void setType(int mode);
 
 protected:
-    virtual void paintEvent(QPaintEvent* event) override;
+    void paintEvent(QPaintEvent* event) override;
     virtual QSize sizeHint() const override;
 
     virtual void startSwitchAnimation(double target, int duration) override;

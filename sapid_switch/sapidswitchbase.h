@@ -24,6 +24,8 @@ public:
     bool getState() const;
     bool isChecked() const;
 
+    virtual void setSuitableHeight(int h);
+
 signals:
     void stateChanged(bool state);
 
@@ -68,12 +70,12 @@ protected:
     QColor colorOn = QColor(30, 144, 255);
     QColor colorOff = Qt::lightGray;
     QColor colorBd = Qt::transparent;
-    int borderSize = 0;
+    int borderSize = 0; // 四周的间距，算入手势拖拽的位置
     int switchDuration = 350;
     QEasingCurve curve = QEasingCurve::InOutCubic;
 
     // 几何
-    const double PI = 3.1415926535;
+    const double sapid_PI = 3.1415926535;
     const double GenHao2 = sqrt(2.0);
 
     // 滑动手势
