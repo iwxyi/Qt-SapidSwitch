@@ -34,7 +34,7 @@ protected:
     QRectF rect() const;
 
 protected:
-    double borderProg;
+    double borderProg = 0;
     int mode = 0;
     double radius = 0; // 圆角矩形的半径 = height()/2
     double circleOutMargin = 4; // 指示球和边界的距离
